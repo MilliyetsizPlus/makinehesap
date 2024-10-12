@@ -1,93 +1,207 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hesap Makinesi</title>
-    <style>
-        body {
-            background-color: #121212;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .calculator {
-            border: 2px solid #00ff00;
-            padding: 20px;
-            text-align: center;
-        }
-        input {
-            margin: 10px 0;
-            padding: 5px;
-            font-size: 18px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background-color: #00ff00;
-            border: none;
-            color: #121212;
-            cursor: pointer;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 24px;
-        }
-        pre {
-            color: #ff0000;
-        }
-    </style>
+<html><head><base href="https://websim.creation.engine/notepad-app/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile Notepad</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        height: 100%;
+        background-color: #f0f0f0;
+    }
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .header {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-size: 1.2em;
+    }
+    .note-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    .note-item {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .note-item:hover {
+        background-color: #e9e9e9;
+    }
+    .note-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .note-preview {
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .add-note-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: background-color 0.3s;
+    }
+    .add-note-btn:hover {
+        background-color: #45a049;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 500px;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close:hover {
+        color: #000;
+    }
+    #note-title, #note-content {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    #note-content {
+        height: 200px;
+        resize: vertical;
+    }
+    .save-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+    .save-btn:hover {
+        background-color: #45a049;
+    }
+</style>
 </head>
 <body>
-
-    <div class="calculator">
-        <h1>Hesap Makinesi</h1>
-        <input type="number" id="num1" placeholder="Birinci sayıyı girin"><br>
-        <input type="number" id="num2" placeholder="İkinci sayıyı girin"><br>
-        <button onclick="calculate()">Hesapla!</button>
-
-        <div id="result"></div>
+    <div class="app-container">
+        <div class="header">Mobile Notepad</div>
+        <div class="note-list" id="note-list">
+            <!-- Notes will be dynamically added here -->
+        </div>
+        <button class="add-note-btn" id="add-note-btn">+</button>
     </div>
 
-    <script>
-        function calculate() {
-            var num1 = document.getElementById('num1').value;
-            var num2 = document.getElementById('num2').value;
-            var resultDiv = document.getElementById('result');
+    <div id="note-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <input type="text" id="note-title" placeholder="Note Title">
+            <textarea id="note-content" placeholder="Note Content"></textarea>
+            <button class="save-btn" id="save-note-btn">Save Note</button>
+        </div>
+    </div>
 
-            if (num1 === '' || num2 === '') {
-                resultDiv.innerHTML = "Lütfen her iki sayıyı da girin.";
-                return;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+            function displayNotes() {
+                const noteList = $('#note-list');
+                noteList.empty();
+                notes.forEach((note, index) => {
+                    noteList.append(`
+                        <div class="note-item" data-index="${index}">
+                            <div class="note-title">${note.title}</div>
+                            <div class="note-preview">${note.content.substring(0, 50)}${note.content.length > 50 ? '...' : ''}</div>
+                        </div>
+                    `);
+                });
             }
 
-            var sum = parseInt(num1) + parseInt(num2);
+            function saveNotes() {
+                localStorage.setItem('notes', JSON.stringify(notes));
+            }
 
-            resultDiv.innerHTML = `
-                <pre>
-   ██████╗ ███████╗██╗   ██╗██████╗ ███████╗██████╗ 
-  ██╔═══██╗██╔════╝██║   ██║██╔══██╗██╔════╝██╔══██╗
-  ██║   ██║███████╗██║   ██║██████╔╝█████╗  ██████╔╝
-  ██║   ██║╚════██║██║   ██║██╔═══╝ ██╔══╝  ██╔══██╗
-  ╚██████╔╝███████║╚██████╔╝██║     ███████╗██║  ██║
-   ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═╝
+            $('#add-note-btn').click(function() {
+                $('#note-modal').css('display', 'block');
+                $('#note-title').val('');
+                $('#note-content').val('');
+            });
 
-                </pre>
-                <p>Tebrikler! NASA'nın sistemine girdiniz. Bütün gizli veriler sizin!<br>
-                İşlem Sonucu: ${sum}<br>
-                Uzaylılar sizi izliyor, dikkatli olun!</p>
-            <p> EVİNİZDEN AYRİLMAYİN</p>
-            `;
-            resultDiv.style.color = '#ff0000';
-            resultDiv.style.fontSize = '22px';
-        }
+            $('.close').click(function() {
+                $('#note-modal').css('display', 'none');
+            });
+
+            $('#save-note-btn').click(function() {
+                const title = $('#note-title').val().trim();
+                const content = $('#note-content').val().trim();
+                if (title && content) {
+                    notes.push({ title, content });
+                    saveNotes();
+                    displayNotes();
+                    $('#note-modal').css('display', 'none');
+                } else {
+                    alert('Please enter both title and content for the note.');
+                }
+            });
+
+            $(document).on('click', '.note-item', function() {
+                const index = $(this).data('index');
+                const note = notes[index];
+                $('#note-title').val(note.title);
+                $('#note-content').val(note.content);
+                $('#note-modal').css('display', 'block');
+            });
+
+            displayNotes();
+        });
     </script>
-
-</body>
-</html>
+</body></html>
